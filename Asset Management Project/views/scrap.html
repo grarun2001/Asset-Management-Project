@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Scrap Asset</title>
+    </head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    <style>
+    
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e1f2ea;
+    }
+  
+    /* Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+  
+    /* Page Title */
+    h2 {
+      color: #0d374f;
+    }
+  
+    /* Filters and Search Bar */
+    .row .form-control {
+      width: 100%;
+    }
+  
+    /* Table */
+    .table {
+      margin-top: 20px;
+    }
+  
+    /* Table Header */
+    .table th {
+      background-color: #29d2b2;
+      color: #0d374f;
+    }
+  
+    /* Table Body */
+    .table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+  
+    /* Table Actions */
+    .table tbody .action-btn {
+      cursor: pointer;
+      color: #007bff;
+    }
+    #brand{
+    font-weight: bolder;
+    color: #0d374f;
+  }
+  .title{
+    font-weight: bolder;
+  }
+  .navbar{
+    background-color: #29d2b2;
+  }
+  .btnid{
+    display: flex;
+    justify-content: space-evenly;
+    gap: 3em;
+  }
+    </style>
+    <!--  Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark d-flex justify-content-between">
+    <div>
+    <img src="./img/kt1.jpeg" height="40px" width="40px">
+    <a id="brand" class="navbar-brand">KT Telematic Solution Pvt. Ltd.</a>
+</div>
+    <div class="navid">
+    <a class="btn bg-light" href="employee.html">⬅️Back</a>
+</div>
+  </nav>
+<body>
+
+    <div class="container mt-4">
+      <div class="btnid">
+        <a class="btn text-dark" href="asset.html">AssetsMaster</a>
+        <a class="btn text-dark" href="stock.html">StockView</a>
+        <a class="btn  text-dark" href="issue.html">Issue</a>
+        <a class="btn  text-dark" href="returned.html">Return</a>
+        <a class="btn  text-dark" href="scrap.html">Scrap</a>
+        <a class="btn  text-dark" href="history.html">History</a>
+      </div>
+        <h2 class="title mt-5">Scrap Asset</h2>
+        
+        <!--  asset Table -->
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Serial No</th>
+                  <th>Make</th>
+                  <th>Model</th>
+                  <th>Category</th>
+                  <!-- <th>Stock</th> -->
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!--  asset data will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    
+</body>
+<script>
+// Function to display employees in the table
+function displayScrap() {
+  fetch("http://localhost:9000/getasset")
+ .then(res => res.json()) // Make sure to call the function
+ .then(json =>  json.forEach((scrap, index) => {
+  if(scrap.returned===true){
+    const row = `<tr>
+                          <td>${scrap.serialno}</td>
+                          <td>${scrap.make}</td>
+                          <td>${scrap.model}</td>
+                          <td>${scrap.category}</td>
+                          
+                          <td>
+<button class="btn btn-sm btn-info text-white action-btn" onclick="editscrap(${scrap.serialno})">${scrap.scrap?"scraped":"scrap"}</button>
+
+                          </td>
+                      </tr>`
+                     
+                      tbody.innerHTML += row;}
+                  })) // Process the JSON response
+
+ .catch(error => console.error('Error fetching data:', error));
+  const tbody = document.querySelector("tbody");        
+ 
+  };
+  window.onload = function () {
+    displayScrap();
+  };
+
+  function editscrap(serialno) {
+     // Send the updated details to the server
+    fetch(`http://localhost:9000/asset/${serialno}`, {
+        method: 'PUT', 
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          stockunit:false,
+          issued:false,
+          returned:false,
+          scrap:true
+        })
+    })
+   .then(response => response.json())
+   .then(data => {
+    console.log(data)
+        alert("scraped successfully");
+       
+    })
+   .catch((error) => {
+        console.error('Error:', error);
+    });
+  }
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>;
+</html>

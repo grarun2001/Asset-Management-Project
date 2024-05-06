@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asset Master</title>
+  </head>
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #e1f2ea;
+    }
+
+    /* Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Page Title */
+    h2 {
+      color: #0d374f;
+    }
+
+    /* Filters and Search Bar */
+    .row .form-control {
+      width: 100%;
+    }
+
+    /* Table */
+    .table {
+      margin-top: 20px;
+    }
+
+    /* Table Header */
+    .table th {
+      background-color: #29d2b2;
+      color: #0d374f;
+    }
+
+    /* Table Body */
+    .table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    /* Table Actions */
+    .table tbody .action-btn {
+      cursor: pointer;
+      color: #007bff;
+    }
+    #brand {
+      font-weight: bolder;
+      color: #0d374f;
+    }
+    .title {
+      font-weight: bolder;
+    }
+    .navbar {
+      background-color: #29d2b2;
+    }
+    .btnid {
+      display: flex;
+      justify-content: space-evenly;
+      gap: 5em;
+    }
+
+    /* .btnid a{
+    background-color: #29d2b2;
+  } */
+  </style>
+  <!--  Navigation Bar -->
+  <nav
+    class="navbar navbar-expand-lg navbar-dark d-flex justify-content-between"
+  >
+    <div>
+      <img src="./img/kt1.jpeg" height="40px" width="40px" />
+      <a id="brand" class="navbar-brand">KT Telematic Solution Pvt. Ltd.</a>
+    </div>
+    <div class="navid">
+      <a class="btn bg-light" href="employee.html">⬅️Back</a>
+    </div>
+  </nav>
+  <body>
+    <div class="container mt-4">
+      <div class="btnid">
+        <a class="btn text-dark" href="stock.html">StockView</a>
+        <a class="btn text-dark" href="issue.html">Issue</a>
+        <a class="btn text-dark" href="returned.html">Return</a>
+        <a class="btn text-dark" href="scrap.html">Scrap</a>
+        <a class="btn text-dark" href="history.html">History</a>
+      </div>
+      <h2 class="title mt-5">Assets Master</h2>
+      <button class="btn btn-danger" onclick="addAssets()" id="addassetBtn">
+        Add New ➕
+      </button>
+      <div id="assetForm" style="display: none">
+        <form id="assetForm">
+          <label for="serialno">Serial No:</label><br />
+          <input type="text" id="assetID" name="assetID" /><br />
+
+          <label for="make">Make:</label><br />
+          <input type="text" id="make" name="make" /><br />
+
+          <label for="model">Model:</label><br />
+          <input type="text" id="model" name="model" /><br />
+
+          <label for="category">Category:</label><br />
+          <input type="type" id="category" name="category" /><br />
+
+          <label for="stock">Stock:</label><br />
+          <input type="checkbox" id="stock" name="stock" /><br />
+
+          <input type="submit" value="Submit" />
+        </form>
+      </div>
+      <!--  Filters and Search Bar -->
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <!--  Filters for active/inactive assets -->
+          <select class="form-control" onchange="filterassets(this.value)">
+            <option value="all category">All Category</option>
+            <option value="laptop">Laptops</option>
+            <option value="mobile">Mobiles</option>
+            <option value="tablet">Tablets</option>
+          </select>
+        </div>
+      </div>
+      <!--  asset Table -->
+      <div class="row mt-3">
+        <div class="col-md-12">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Serial No</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!--  asset data will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    // Function to filter asset in the table
+    function displayAsset() {
+      fetch("http://localhost:9000/getasset")
+        .then((res) => res.json()) // Make sure to call the function
+        .then((json) => {
+          assetsData = json; // Store the fetched data
+          displayFilteredAssets(assetsData); // Display asset initially
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    }
+
+    window.onload = function () {
+      displayAsset();
+    };
+
+    // Function to add a new asset
+    function addAssets() {
+      document
+        .getElementById("addassetBtn")
+        .addEventListener("click", function () {
+          // Display the form in a popup
+          var form = document.getElementById("assetForm");
+          form.style.display = "block";
+          form.style.position = "fixed";
+          form.style.zIndex = "1";
+          // form.style.right = '50%';
+          form.style.left = "50%";
+          form.style.top = "50%";
+          form.style.transform = "translate(-50%, -50%)";
+          form.style.color = "white";
+          // form.style.textAlign="center"
+          form.style.paddingLeft = "1em";
+          form.style.width = "50%";
+          form.style.height = "70%";
+          form.style.overflow = "auto";
+          // form.style.backgroundColor = 'rgb(51, 54, 52)';
+          form.style.backgroundColor = "#29d2b2";
+        });
+    }
+    document
+      .getElementById("assetForm")
+      .addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+
+        // Collect form data
+        var assetID = parseInt(document.getElementById("assetID").value);
+        console.log(assetID);
+        console.log(typeof assetID);
+        var make = document.getElementById("make").value;
+        var model = document.getElementById("model").value;
+        var category = document.getElementById("category").value;
+        var stock = document.getElementById("stock").value;
+
+        // Example: Send the data to a server-side script
+        // Replace 'http://localhost:9000/addEmployee' with your server-side script URL
+        fetch("http://localhost:9000/am", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            serialno: assetID,
+            make: make,
+            model: model,
+            category: category,
+            stockunit: true,
+            issued: false,
+            returned: false,
+            scrap: false,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+            document.getElementById("assetForm").style.display = "none";
+            alert("successfully added");
+            location.reload();
+
+            // Handle success (e.g., close the popup, show a success message)
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+
+    function editAsset(serialno) {
+      // Fetch the employee details from the server
+      console.log(serialno);
+      fetch(`http://localhost:9000/asset/${serialno}`)
+        .then((response) => response.json())
+        .then((asset) => {
+          // Display the form in a popup with the employee's details pre-filled
+          var form = document.getElementById("assetForm");
+          form.style.display = "block";
+          form.style.position = "fixed";
+          form.style.zIndex = "1";
+          form.style.left = "50%";
+          form.style.top = "50%";
+          form.style.transform = "translate(-50%, -50%)";
+          form.style.color = "white";
+          form.style.paddingLeft = "1em";
+          form.style.width = "50%";
+          form.style.height = "70%";
+          form.style.overflow = "auto";
+          // form.style.backgroundColor = 'rgb(51, 54, 52)';
+          form.style.backgroundColor = "#29d2b2";
+
+          // Pre-fill the form with the employee's details
+          document.getElementById("assetID").value = asset.serialno;
+          document.getElementById("make").value = asset.make;
+          document.getElementById("model").value = asset.model;
+          document.getElementById("category").value = asset.category;
+          document.getElementById("stock").value = asset.stockunit;
+        })
+        .catch((error) =>
+          console.error("Error fetching asset details:", error)
+        );
+    }
+    document
+      .getElementById("assetForm")
+      .addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+
+        // Collect form data
+        var assetID = document.getElementById("assetID").value;
+        var make = document.getElementById("make").value;
+        var model = document.getElementById("model").value;
+        var category = document.getElementById("category").value;
+        var stock = document.getElementById("stock").value;
+
+        // Send the updated details to the server
+        fetch(`http://localhost:9000/asset/${serialno}`, {
+          method: "PUT", // or 'PATCH'
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            make: make,
+            model: model,
+            category: category,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(response.status());
+            document.getElementById("assetForm").style.display = "none";
+            alert("asset details updated successfully");
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // alert("Please fill all details correctly");
+          });
+      });
+
+    // Function to filter asset based on status
+    function filterassets(status) {
+      const filterAssets = assetsData.filter((asset) => {
+        console.log(status);
+        if (status === "all category") {
+          return true;
+        } else if (status === "laptop") {
+          return asset.category == "Laptop";
+        } else if (status === "mobile") {
+          return asset.category;
+        } else if (status === "tablet") {
+          return !asset.category;
+        }
+      });
+
+      displayFilteredAssets(filterAssets);
+    }
+
+    function displayFilteredAssets(filterAssets) {
+      const tbody = document.querySelector("tbody");
+      tbody.innerHTML = "";
+      filterAssets.forEach((asset) => {
+        const row = `
+      <tr>
+        <td>${asset.serialno}</td>
+        <td>${asset.make}</td>
+        <td>${asset.model}</td>
+        <td>${asset.category}</td>
+        <td>${asset.stockunit ? "yes" : "no"}</td>
+        <td>
+          <button class="btn btn-sm btn-info text-white action-btn" onclick="editAsset(${
+            asset.serialno
+          })">Edit</button>        </td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+  </script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"
+  ></script>
+  ;
+</html>

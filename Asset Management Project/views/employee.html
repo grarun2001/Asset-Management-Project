@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Master</title>
+  </head>
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      /* background-color: #b0b0b0; */
+      background-color: #e1f2ea;
+    }
+
+    /* Container */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Page Title */
+    h2 {
+      color: #0d374f;
+    }
+
+    /* Filters and Search Bar */
+    .row .form-control {
+      width: 100%;
+    }
+
+    /* Table */
+    .table {
+      margin-top: 20px;
+    }
+
+    /* Table Header */
+    .table th {
+      /* background-color: #333; */
+      background-color: #29d2b2;
+      color: #0d374f;
+    }
+
+    /* Table Body */
+    .table tbody tr:hover {
+      background-color: #f5f5f5;
+    }
+
+    /* Table Actions */
+    .table tbody .action-btn {
+      cursor: pointer;
+      color: #007bff;
+    }
+    #brand {
+      font-weight: bolder;
+      color: #0d374f;
+    }
+    .title {
+      font-weight: bolder;
+    }
+    .navbar {
+      background-color: #29d2b2;
+    }
+    #navid {
+      text-decoration: none;
+      color: #0d374f;
+    }
+  </style>
+  <!-- Navigation Bar -->
+  <nav
+    class="navbar navbar-expand-lg navbar-dark d-flex justify-content-between"
+  >
+    <div>
+      <img src="./img/kt1.jpeg" height="40px" width="40px" />
+      <a id="brand" class="navbar-brand">KT Telematic Solution Pvt. Ltd.</a>
+    </div>
+
+    <a id="navid" href="asset.html">AssetsMaster</a>
+  </nav>
+
+  <!-- Employee Master Content -->
+  <div class="container mt-5">
+    <h2 class="title">Employee Master</h2>
+    <button class="btn btn-danger" onclick="addEmployee()" id="addEmployeeBtn">
+      Add New ➕
+    </button>
+    <div id="employeeForm" style="display: none">
+      <form id="employeeForm">
+        <label for="employeeID">Employee ID:</label><br />
+        <input type="text" id="employeeID" name="employeeID" /><br />
+        <label for="employeeName">Employee Name:</label><br />
+        <input type="text" id="employeeName" name="employeeName" /><br />
+        <label for="dateOfBirth">Date of Birth:</label><br />
+        <input type="date" id="dateOfBirth" name="dateOfBirth" /><br />
+        <label for="email">Email:</label><br />
+        <input type="email" id="email" name="email" /><br />
+        <label for="phoneNumber">Phone Number:</label><br />
+        <input type="tel" id="phoneNumber" name="phoneNumber" /><br />
+        <label for="isActive">Is Active:</label><br />
+        <input type="checkbox" id="isActive" name="isActive" /><br />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+    <!--  Filters and Search Bar -->
+    <div class="row mt-3">
+      <div class="col col-md-6">
+        <!--  Filters for active/inactive employees -->
+        <select class="form-control" onchange="filterEmployees(this.value)">
+          <option value="all">All Employees</option>
+          <option value="active">Active Employees</option>
+          <option value="inactive">Inactive Employees</option>
+        </select>
+      </div>
+    </div>
+    <!--  Employee Table -->
+    <div class="row mt-3">
+      <div class="col-md-12">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!--  Employee data will be populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!--  JavaScript dependencies -->
+
+  <script>
+    // Function to display employees in the table
+    function displayEmployees() {
+      fetch("http://localhost:9000/empdet")
+        .then((res) => res.json()) // Make sure to call the function
+        .then((json) => {
+          employeesData = json; // Store the fetched data
+          displayFilteredEmployees(employeesData); // Display all employees initially
+        })
+        .catch((error) => console.error("Error fetching data:", error));
+    }
+
+    // Function to add a new employee
+    function addEmployee() {
+      document
+        .getElementById("addEmployeeBtn")
+        .addEventListener("click", function () {
+          // Display the form in a popup
+          var form = document.getElementById("employeeForm");
+          form.style.display = "block";
+          form.style.position = "fixed";
+          form.style.zIndex = "1";
+          // form.style.right = '50%';
+          form.style.left = "50%";
+          form.style.top = "50%";
+          form.style.transform = "translate(-50%, -50%)";
+          form.style.color = "white";
+          // form.style.textAlign="center"
+          form.style.paddingLeft = "1em";
+          form.style.width = "50%";
+          form.style.height = "70%";
+          form.style.overflow = "auto";
+          // form.style.backgroundColor = 'rgb(51, 54, 52)';
+          form.style.backgroundColor = "#29d2b2";
+        });
+
+      document
+        .getElementById("employeeForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent the form from submitting normally
+
+          // Collect form data
+          var employeeID = document.getElementById("employeeID").value;
+          var employeeName = document.getElementById("employeeName").value;
+          var dateOfBirth = document.getElementById("dateOfBirth").value;
+          var email = document.getElementById("email").value;
+          var phoneNumber = document.getElementById("phoneNumber").value;
+          var isActive = document.getElementById("isActive").checked
+            ? "true"
+            : "false";
+
+          fetch("http://localhost:9000/emp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employeeID: employeeID,
+              employeeName: employeeName,
+              dateofbirth: dateOfBirth,
+              email: email,
+              phoneNumber: phoneNumber,
+              isActive: isActive,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Success:", data);
+              document.getElementById("employeeForm").style.display = "none";
+              alert("successfully added");
+              location.reload();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+    }
+
+    // Function to edit an existing employee
+
+    function editEmployee(employeeId) {
+      // Fetch the employee details from the server
+      fetch(`http://localhost:9000/empdet/${employeeId}`)
+        .then((response) => response.json())
+        .then((employee) => {
+          // Display the form in a popup with the employee's details pre-filled
+          var form = document.getElementById("employeeForm");
+          form.style.display = "block";
+          form.style.position = "fixed";
+          form.style.zIndex = "1";
+          form.style.left = "50%";
+          form.style.top = "50%";
+          form.style.transform = "translate(-50%, -50%)";
+          form.style.color = "white";
+          form.style.paddingLeft = "1em";
+          form.style.width = "50%";
+          form.style.height = "70%";
+          form.style.overflow = "auto";
+          // form.style.backgroundColor = 'rgb(51, 54, 52)';
+          form.style.backgroundColor = "#29d2b2";
+
+          // Pre-fill the form with the employee's details
+          document.getElementById("employeeID").value = employee.employeeID;
+          document.getElementById("employeeName").value = employee.employeeName;
+          document.getElementById("dateOfBirth").value = employee.dateofbirth;
+          document.getElementById("email").value = employee.email;
+          document.getElementById("phoneNumber").value = employee.phoneNumber;
+          document.getElementById("isActive").checked =
+            employee.isActive === "true";
+        })
+        .catch((error) =>
+          console.error("Error fetching employee details:", error)
+        );
+    }
+    document
+      .getElementById("employeeForm")
+      .addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+
+        // Collect form data
+        var employeeID = document.getElementById("employeeID").value;
+        var employeeName = document.getElementById("employeeName").value;
+        var dateOfBirth = document.getElementById("dateOfBirth").value;
+        var email = document.getElementById("email").value;
+        var phoneNumber = document.getElementById("phoneNumber").value;
+        var isActive = document.getElementById("isActive").checked
+          ? "true"
+          : "false";
+
+        // Send the updated details to the server
+        fetch(`http://localhost:9000/empdet/${employeeID}`, {
+          method: "PUT", // or 'PATCH'
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            employeeID: employeeID,
+            employeeName: employeeName,
+            dateofbirth: dateOfBirth,
+            email: email,
+            phoneNumber: phoneNumber,
+            isActive: isActive,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            // console.log(response.status());
+            document.getElementById("employeeForm").style.display = "none";
+            alert("Employee details updated successfully");
+            location.reload();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // alert("Please fill all details correctly");
+          });
+      });
+
+    // Function to filter employees based on status
+    function filterEmployees(status) {
+      const filteredEmployees = employeesData.filter((employee) => {
+        console.log(employee);
+        if (status === "all") {
+          return true;
+        } else if (status === "active") {
+          return employee.isActive; // Return only active employees
+        } else if (status === "inactive") {
+          return !employee.isActive; // Return only inactive employees
+        }
+      });
+      displayFilteredEmployees(filteredEmployees);
+    }
+
+    function displayFilteredEmployees(filteredEmployees) {
+      const tbody = document.querySelector("tbody");
+      tbody.innerHTML = "";
+      filteredEmployees.forEach((employee) => {
+        const row = `
+      <tr>
+        <td>${employee.employeeID}</td>
+        <td>${employee.employeeName}</td>
+        <td>${employee.dateofbirth}</td>
+        <td>${employee.email}</td>
+        <td>${employee.phoneNumber}</td>
+        <td>${employee.isActive ? "Active" : "Inactive"}</td>
+        <td>
+          <button class="btn btn-sm btn-info text-white action-btn" onclick="editEmployee(${
+            employee.employeeID
+          })">Edit</button>
+        </td>
+      </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    // Display employees when the page loads
+    window.onload = function () {
+      displayEmployees();
+    };
+  </script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"
+  ></script>
+  ;
+</html>
